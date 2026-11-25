@@ -14,6 +14,8 @@ import cafecentral.patrones.observer.ObservadorPedido;
 import cafecentral.servicios.PedidoService;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 
 public class VentanaPrincipal extends JFrame implements ObservadorPedido {
@@ -29,8 +31,15 @@ public class VentanaPrincipal extends JFrame implements ObservadorPedido {
     private JTextArea productosArea;
     private JTextArea notificacionesArea;
 
-    public VentanaPrincipal() {
+    // Paleta de colores estilo cafetería (fácil de modificar)
+    private final Color COLOR_FONDO = new Color(247, 243, 238);       // Crema claro
+    private final Color COLOR_CAFE_OSCURO = new Color(59, 35, 20);    // Expreso oscuro
+    private final Color COLOR_CAFE_MEDIO = new Color(111, 78, 55);    // Café con leche
+    private final Color COLOR_CARAMELO = new Color(210, 145, 75);     // Dorado cálido
+    private final Color COLOR_TARJETA = Color.WHITE;                  // Blanco puro
+    private final Color COLOR_BORDE = new Color(220, 210, 198);       // Borde beige suave
 
+    public VentanaPrincipal() {
         pedidoService = new PedidoService();
 
         configurarVentana();
@@ -39,587 +48,328 @@ public class VentanaPrincipal extends JFrame implements ObservadorPedido {
     }
 
     private void configurarVentana() {
-
         setTitle("Café Central - Sistema de Gestión");
-
-        setSize(1000, 700);
-
+        setSize(1050, 740);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
         setLocationRelativeTo(null);
     }
 
     private void crearInterfaz() {
-
-        setLayout(new BorderLayout(10, 10));
+        // Panel principal con márgenes alrededor
+        JPanel contenedorPrincipal = new JPanel(new BorderLayout(15, 15));
+        contenedorPrincipal.setBackground(COLOR_FONDO);
+        contenedorPrincipal.setBorder(new EmptyBorder(15, 15, 15, 15));
+        setContentPane(contenedorPrincipal);
 
         add(crearEncabezado(), BorderLayout.NORTH);
 
-        JPanel centro = new JPanel(
-                new GridLayout(1, 2, 10, 10)
-        );
-
+        JPanel centro = new JPanel(new GridLayout(1, 2, 15, 15));
+        centro.setBackground(COLOR_FONDO);
         centro.add(crearPanelMenu());
         centro.add(crearPanelPedido());
 
         add(centro, BorderLayout.CENTER);
-
         add(crearPanelInferior(), BorderLayout.SOUTH);
     }
 
     private JPanel crearEncabezado() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(COLOR_CAFE_OSCURO);
+        panel.setBorder(new EmptyBorder(18, 20, 18, 20));
 
-        JPanel panel = new JPanel(
-                new BorderLayout()
-        );
+        JLabel titulo = new JLabel("☕  CAFÉ CENTRAL", SwingConstants.CENTER);
+        titulo.setFont(new Font("SansSerif", Font.BOLD, 28));
+        titulo.setForeground(new Color(250, 240, 225));
 
-        JLabel titulo = new JLabel(
-                "☕ CAFÉ CENTRAL",
-                SwingConstants.CENTER
-        );
-
-        titulo.setFont(
-                new Font("Arial", Font.BOLD, 28)
-        );
+        JLabel subtitulo = new JLabel("Sistema de Pedidos y Barra de Café", SwingConstants.CENTER);
+        subtitulo.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        subtitulo.setForeground(COLOR_CARAMELO);
 
         panel.add(titulo, BorderLayout.CENTER);
+        panel.add(subtitulo, BorderLayout.SOUTH);
 
         return panel;
     }
 
     private JPanel crearPanelMenu() {
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBackground(COLOR_TARJETA);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+                new LineBorder(COLOR_BORDE, 1, true),
+                new EmptyBorder(15, 15, 15, 15)
+        ));
 
-        JPanel panel = new JPanel(
-                new BorderLayout()
-        );
-
-        JLabel titulo = new JLabel(
-                "MENÚ DE PRODUCTOS",
-                SwingConstants.CENTER
-        );
-
-        titulo.setFont(
-                new Font("Arial", Font.BOLD, 20)
-        );
-
+        JLabel titulo = new JLabel("MENÚ DE PRODUCTOS", SwingConstants.CENTER);
+        titulo.setFont(new Font("SansSerif", Font.BOLD, 18));
+        titulo.setForeground(COLOR_CAFE_OSCURO);
+        titulo.setBorder(new EmptyBorder(0, 0, 10, 0));
         panel.add(titulo, BorderLayout.NORTH);
 
-        JPanel botones = new JPanel(
-                new GridLayout(0, 1, 5, 5)
-        );
+        JPanel botones = new JPanel(new GridLayout(0, 1, 10, 10));
+        botones.setBackground(COLOR_TARJETA);
 
-        JButton americanoButton =
-                new JButton(
-                        "Café Americano - $4.000"
-                );
+        JButton americanoButton = crearBotonEstilizado("☕  Café Americano  —  $4.000", COLOR_CAFE_MEDIO, Color.WHITE);
+        JButton capuchinoButton = crearBotonEstilizado("🥛  Capuchino  —  $6.000", COLOR_CAFE_MEDIO, Color.WHITE);
 
-        JButton capuchinoButton =
-                new JButton(
-                        "Capuchino - $6.000"
-                );
+        JLabel extrasLabel = new JLabel("PERSONALIZAR ÚLTIMO CAFÉ:", SwingConstants.LEFT);
+        extrasLabel.setFont(new Font("SansSerif", Font.BOLD, 12));
+        extrasLabel.setForeground(Color.GRAY);
+        extrasLabel.setBorder(new EmptyBorder(8, 2, 0, 0));
 
-        JButton lecheButton =
-                new JButton(
-                        "Agregar leche deslactosada"
-                );
+        JButton lecheButton = crearBotonEstilizado("+ Agregar leche deslactosada", new Color(242, 232, 218), COLOR_CAFE_OSCURO);
+        JButton shotButton = crearBotonEstilizado("+ Agregar shot adicional", new Color(242, 232, 218), COLOR_CAFE_OSCURO);
 
-        JButton shotButton =
-                new JButton(
-                        "Agregar shot adicional"
-                );
+        JButton nuevoPedidoButton = crearBotonEstilizado("✨  Nuevo Pedido", COLOR_CARAMELO, Color.WHITE);
 
-        JButton nuevoPedidoButton =
-                new JButton(
-                        "Nuevo pedido"
-                );
-
-        americanoButton.addActionListener(
-                e -> agregarAmericano()
-        );
-
-        capuchinoButton.addActionListener(
-                e -> agregarCapuchino()
-        );
-
-        lecheButton.addActionListener(
-                e -> agregarLeche()
-        );
-
-        shotButton.addActionListener(
-                e -> agregarShot()
-        );
-
-        nuevoPedidoButton.addActionListener(
-                e -> crearNuevoPedido()
-        );
+        americanoButton.addActionListener(e -> agregarAmericano());
+        capuchinoButton.addActionListener(e -> agregarCapuchino());
+        lecheButton.addActionListener(e -> agregarLeche());
+        shotButton.addActionListener(e -> agregarShot());
+        nuevoPedidoButton.addActionListener(e -> crearNuevoPedido());
 
         botones.add(americanoButton);
         botones.add(capuchinoButton);
-
-        botones.add(
-                new JLabel("")
-        );
-
+        botones.add(extrasLabel);
         botones.add(lecheButton);
         botones.add(shotButton);
-
-        botones.add(
-                new JLabel("")
-        );
-
+        botones.add(new JLabel("")); // Espacio separador
         botones.add(nuevoPedidoButton);
 
-        panel.add(
-                botones,
-                BorderLayout.CENTER
-        );
+        panel.add(botones, BorderLayout.CENTER);
 
         return panel;
     }
 
     private JPanel crearPanelPedido() {
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBackground(COLOR_TARJETA);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+                new LineBorder(COLOR_BORDE, 1, true),
+                new EmptyBorder(15, 15, 15, 15)
+        ));
 
-        JPanel panel = new JPanel(
-                new BorderLayout()
-        );
-
-        JLabel titulo = new JLabel(
-                "PEDIDO ACTUAL",
-                SwingConstants.CENTER
-        );
-
-        titulo.setFont(
-                new Font("Arial", Font.BOLD, 20)
-        );
-
-        panel.add(
-                titulo,
-                BorderLayout.NORTH
-        );
+        JLabel titulo = new JLabel("RESUMEN DEL PEDIDO", SwingConstants.CENTER);
+        titulo.setFont(new Font("SansSerif", Font.BOLD, 18));
+        titulo.setForeground(COLOR_CAFE_OSCURO);
+        titulo.setBorder(new EmptyBorder(0, 0, 10, 0));
+        panel.add(titulo, BorderLayout.NORTH);
 
         productosArea = new JTextArea();
-
         productosArea.setEditable(false);
+        productosArea.setFont(new Font("SansSerif", Font.PLAIN, 15));
+        productosArea.setBackground(new Color(252, 250, 247));
+        productosArea.setForeground(new Color(45, 45, 45));
+        productosArea.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        productosArea.setFont(
-                new Font("Arial", Font.PLAIN, 15)
-        );
+        JScrollPane scroll = new JScrollPane(productosArea);
+        scroll.setBorder(new LineBorder(COLOR_BORDE, 1));
+        panel.add(scroll, BorderLayout.CENTER);
 
-        JScrollPane scroll =
-                new JScrollPane(productosArea);
+        // Panel inferior con datos de facturación
+        JPanel informacion = new JPanel(new GridLayout(4, 1, 4, 4));
+        informacion.setBackground(new Color(247, 243, 238));
+        informacion.setBorder(BorderFactory.createCompoundBorder(
+                new LineBorder(COLOR_BORDE, 1),
+                new EmptyBorder(10, 12, 10, 12)
+        ));
 
-        panel.add(
-                scroll,
-                BorderLayout.CENTER
-        );
+        numeroPedidoLabel = new JLabel("Pedido #");
+        numeroPedidoLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
+        numeroPedidoLabel.setForeground(COLOR_CAFE_OSCURO);
 
-        JPanel informacion =
-                new JPanel(
-                        new GridLayout(4, 1)
-                );
+        estadoLabel = new JLabel("Estado:");
+        estadoLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
+        estadoLabel.setForeground(new Color(180, 95, 6));
 
-        numeroPedidoLabel =
-                new JLabel("Pedido #");
+        subtotalLabel = new JLabel("Subtotal: $0");
+        subtotalLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        subtotalLabel.setForeground(Color.DARK_GRAY);
 
-        estadoLabel =
-                new JLabel("Estado:");
-
-        subtotalLabel =
-                new JLabel("Subtotal: $0");
-
-        totalLabel =
-                new JLabel("Total: $0");
+        totalLabel = new JLabel("Total: $0");
+        totalLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
+        totalLabel.setForeground(COLOR_CAFE_OSCURO);
 
         informacion.add(numeroPedidoLabel);
         informacion.add(estadoLabel);
         informacion.add(subtotalLabel);
         informacion.add(totalLabel);
 
-        panel.add(
-                informacion,
-                BorderLayout.SOUTH
-        );
+        panel.add(informacion, BorderLayout.SOUTH);
 
         return panel;
     }
 
     private JPanel crearPanelInferior() {
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBackground(COLOR_FONDO);
 
-        JPanel panel = new JPanel(
-                new BorderLayout()
-        );
+        JPanel botonesEstado = new JPanel(new GridLayout(1, 4, 10, 10));
+        botonesEstado.setBackground(COLOR_FONDO);
 
-        JPanel botonesEstado =
-                new JPanel(
-                        new GridLayout(1, 4, 5, 5)
-                );
+        JButton pendienteButton = crearBotonEstilizado("PENDIENTE", new Color(230, 175, 46), Color.WHITE);
+        JButton prepararButton = crearBotonEstilizado("EN PREPARACIÓN", new Color(217, 119, 36), Color.WHITE);
+        JButton listoButton = crearBotonEstilizado("LISTO", new Color(56, 142, 60), Color.WHITE);
+        JButton entregarButton = crearBotonEstilizado("ENTREGADO", new Color(90, 98, 106), Color.WHITE);
 
-        JButton pendienteButton =
-                new JButton("PENDIENTE");
-
-        JButton prepararButton =
-                new JButton("EN PREPARACIÓN");
-
-        JButton listoButton =
-                new JButton("LISTO");
-
-        JButton entregarButton =
-                new JButton("ENTREGADO");
-
-        pendienteButton.addActionListener(
-                e -> cambiarEstado(
-                        EstadoPedido.PENDIENTE
-                )
-        );
-
-        prepararButton.addActionListener(
-                e -> cambiarEstado(
-                        EstadoPedido.EN_PREPARACION
-                )
-        );
-
-        listoButton.addActionListener(
-                e -> cambiarEstado(
-                        EstadoPedido.LISTO
-                )
-        );
-
-        entregarButton.addActionListener(
-                e -> cambiarEstado(
-                        EstadoPedido.ENTREGADO
-                )
-        );
+        pendienteButton.addActionListener(e -> cambiarEstado(EstadoPedido.PENDIENTE));
+        prepararButton.addActionListener(e -> cambiarEstado(EstadoPedido.EN_PREPARACION));
+        listoButton.addActionListener(e -> cambiarEstado(EstadoPedido.LISTO));
+        entregarButton.addActionListener(e -> cambiarEstado(EstadoPedido.ENTREGADO));
 
         botonesEstado.add(pendienteButton);
         botonesEstado.add(prepararButton);
         botonesEstado.add(listoButton);
         botonesEstado.add(entregarButton);
 
-        panel.add(
-                botonesEstado,
-                BorderLayout.NORTH
-        );
+        panel.add(botonesEstado, BorderLayout.NORTH);
 
-        notificacionesArea =
-                new JTextArea(7, 20);
+        // Panel de notificaciones estilo consola moderna
+        JPanel notificacionesPanel = new JPanel(new BorderLayout(5, 5));
+        notificacionesPanel.setBackground(COLOR_TARJETA);
+        notificacionesPanel.setBorder(BorderFactory.createCompoundBorder(
+                new LineBorder(COLOR_BORDE, 1, true),
+                new EmptyBorder(10, 12, 10, 12)
+        ));
 
+        JLabel titulo = new JLabel("PANEL DE NOTIFICACIONES (OBSERVER)", SwingConstants.LEFT);
+        titulo.setFont(new Font("SansSerif", Font.BOLD, 13));
+        titulo.setForeground(COLOR_CAFE_OSCURO);
+        notificacionesPanel.add(titulo, BorderLayout.NORTH);
+
+        notificacionesArea = new JTextArea(5, 20);
         notificacionesArea.setEditable(false);
+        notificacionesArea.setFont(new Font("Monospaced", Font.PLAIN, 13));
+        notificacionesArea.setBackground(new Color(38, 34, 32));
+        notificacionesArea.setForeground(new Color(144, 238, 144));
+        notificacionesArea.setBorder(new EmptyBorder(8, 10, 8, 10));
 
-        notificacionesArea.setFont(
-                new Font(
-                        "Monospaced",
-                        Font.PLAIN,
-                        13
-                )
-        );
+        JScrollPane scroll = new JScrollPane(notificacionesArea);
+        scroll.setBorder(null);
+        notificacionesPanel.add(scroll, BorderLayout.CENTER);
 
-        JScrollPane scroll =
-                new JScrollPane(
-                        notificacionesArea
-                );
-
-        JPanel notificacionesPanel =
-                new JPanel(
-                        new BorderLayout()
-                );
-
-        JLabel titulo =
-                new JLabel(
-                        "NOTIFICACIONES",
-                        SwingConstants.CENTER
-                );
-
-        titulo.setFont(
-                new Font(
-                        "Arial",
-                        Font.BOLD,
-                        16
-                )
-        );
-
-        notificacionesPanel.add(
-                titulo,
-                BorderLayout.NORTH
-        );
-
-        notificacionesPanel.add(
-                scroll,
-                BorderLayout.CENTER
-        );
-
-        panel.add(
-                notificacionesPanel,
-                BorderLayout.CENTER
-        );
+        panel.add(notificacionesPanel, BorderLayout.CENTER);
 
         return panel;
     }
 
+    // Método auxiliar sencillo para darle estilo plano y bonito a todos los botones
+    private JButton crearBotonEstilizado(String texto, Color fondo, Color textoColor) {
+        JButton boton = new JButton(texto);
+        boton.setFont(new Font("SansSerif", Font.BOLD, 14));
+        boton.setBackground(fondo);
+        boton.setForeground(textoColor);
+        boton.setFocusPainted(false);
+        boton.setOpaque(true);
+        boton.setBorderPainted(false);
+        boton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        boton.setPreferredSize(new Dimension(100, 42));
+        return boton;
+    }
+
     private void crearNuevoPedido() {
+        pedidoActual = pedidoService.crearPedido();
 
-        pedidoActual =
-                pedidoService.crearPedido();
-
-        CocinaObserver cocina =
-                new CocinaObserver();
-
-        CajaObserver caja =
-                new CajaObserver();
-
-        MeseroObserver mesero =
-                new MeseroObserver();
+        CocinaObserver cocina = new CocinaObserver();
+        CajaObserver caja = new CajaObserver();
+        MeseroObserver mesero = new MeseroObserver();
 
         pedidoActual.agregarObservador(cocina);
-
         pedidoActual.agregarObservador(caja);
-
         pedidoActual.agregarObservador(mesero);
-
         pedidoActual.agregarObservador(this);
 
         notificacionesArea.setText("");
-
-        notificacionesArea.append(
-                "✓ Pedido #"
-                + pedidoActual.getId()
-                + " creado correctamente.\n\n"
-        );
+        notificacionesArea.append("✓ Pedido #" + pedidoActual.getId() + " creado correctamente.\n");
 
         actualizarPantalla();
     }
 
     private void agregarAmericano() {
-
-        Producto cafe =
-                new Cafe(
-                        "Café Americano",
-                        4000
-                );
-
-        pedidoActual.agregarProducto(
-                cafe,
-                1
-        );
-
+        Producto cafe = new Cafe("Café Americano", 4000);
+        pedidoActual.agregarProducto(cafe, 1);
         actualizarPantalla();
     }
 
     private void agregarCapuchino() {
-
-        Producto cafe =
-                new Cafe(
-                        "Capuchino",
-                        6000
-                );
-
-        pedidoActual.agregarProducto(
-                cafe,
-                1
-        );
-
+        Producto cafe = new Cafe("Capuchino", 6000);
+        pedidoActual.agregarProducto(cafe, 1);
         actualizarPantalla();
     }
 
     private void agregarLeche() {
-
-        if (
-                pedidoActual
-                        .getProductos()
-                        .isEmpty()
-        ) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Primero agrega un producto al pedido."
-            );
-
+        if (pedidoActual.getProductos().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Primero agrega un producto al pedido.");
             return;
         }
 
-        int ultimo =
-                pedidoActual
-                        .getProductos()
-                        .size() - 1;
+        int ultimo = pedidoActual.getProductos().size() - 1;
+        ItemPedido itemActual = pedidoActual.getProductos().get(ultimo);
+        Producto productoActual = itemActual.getProducto();
 
-        ItemPedido itemActual =
-                pedidoActual
-                        .getProductos()
-                        .get(ultimo);
+        Producto productoPersonalizado = new LecheDeslactosada(productoActual);
+        ItemPedido nuevoItem = new ItemPedido(productoPersonalizado, itemActual.getCantidad());
 
-        Producto productoActual =
-                itemActual.getProducto();
-
-        Producto productoPersonalizado =
-                new LecheDeslactosada(
-                        productoActual
-                );
-
-        ItemPedido nuevoItem =
-                new ItemPedido(
-                        productoPersonalizado,
-                        itemActual.getCantidad()
-                );
-
-        pedidoActual
-                .getProductos()
-                .set(
-                        ultimo,
-                        nuevoItem
-                );
-
+        pedidoActual.getProductos().set(ultimo, nuevoItem);
         actualizarPantalla();
     }
 
     private void agregarShot() {
-
-        if (
-                pedidoActual
-                        .getProductos()
-                        .isEmpty()
-        ) {
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Primero agrega un producto al pedido."
-            );
-
+        if (pedidoActual.getProductos().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Primero agrega un producto al pedido.");
             return;
         }
 
-        int ultimo =
-                pedidoActual
-                        .getProductos()
-                        .size() - 1;
+        int ultimo = pedidoActual.getProductos().size() - 1;
+        ItemPedido itemActual = pedidoActual.getProductos().get(ultimo);
+        Producto productoActual = itemActual.getProducto();
 
-        ItemPedido itemActual =
-                pedidoActual
-                        .getProductos()
-                        .get(ultimo);
+        Producto productoPersonalizado = new ShotAdicional(productoActual);
+        ItemPedido nuevoItem = new ItemPedido(productoPersonalizado, itemActual.getCantidad());
 
-        Producto productoActual =
-                itemActual.getProducto();
-
-        Producto productoPersonalizado =
-                new ShotAdicional(
-                        productoActual
-                );
-
-        ItemPedido nuevoItem =
-                new ItemPedido(
-                        productoPersonalizado,
-                        itemActual.getCantidad()
-                );
-
-        pedidoActual
-                .getProductos()
-                .set(
-                        ultimo,
-                        nuevoItem
-                );
-
+        pedidoActual.getProductos().set(ultimo, nuevoItem);
         actualizarPantalla();
     }
 
-    private void cambiarEstado(
-            EstadoPedido nuevoEstado
-    ) {
-
+    private void cambiarEstado(EstadoPedido nuevoEstado) {
         if (pedidoActual == null) {
             return;
         }
-
-        pedidoActual.cambiarEstado(
-                nuevoEstado
-        );
-
+        pedidoActual.cambiarEstado(nuevoEstado);
         actualizarPantalla();
     }
 
     @Override
-    public void actualizar(
-            Pedido pedido
-    ) {
-
-        String mensaje =
-                "✓ PEDIDO #"
-                + pedido.getId()
-                + " → "
-                + pedido.getEstado()
-                + "\n";
-
-        notificacionesArea.append(
-                mensaje
-        );
-
+    public void actualizar(Pedido pedido) {
+        String mensaje = "✓ PEDIDO #" + pedido.getId() + " → " + pedido.getEstado() + "\n";
+        notificacionesArea.append(mensaje);
         actualizarPantalla();
     }
 
     private void actualizarPantalla() {
-
         if (pedidoActual == null) {
             return;
         }
 
-        numeroPedidoLabel.setText(
-                "Pedido #"
-                + pedidoActual.getId()
-        );
-
-        estadoLabel.setText(
-                "Estado: "
-                + pedidoActual.getEstado()
-        );
-
-        subtotalLabel.setText(
-                String.format(
-                        "Subtotal: $%.0f",
-                        pedidoActual
-                                .calcularSubtotal()
-                )
-        );
-
-        totalLabel.setText(
-                String.format(
-                        "Total: $%.0f",
-                        pedidoActual
-                                .calcularTotal()
-                )
-        );
+        numeroPedidoLabel.setText("Pedido #" + pedidoActual.getId());
+        estadoLabel.setText("Estado: " + pedidoActual.getEstado());
+        subtotalLabel.setText(String.format("Subtotal: $%.0f", pedidoActual.calcularSubtotal()));
+        totalLabel.setText(String.format("Total: $%.0f", pedidoActual.calcularTotal()));
 
         productosArea.setText("");
-
-        for (
-                ItemPedido item
-                : pedidoActual.getProductos()
-        ) {
-
+        for (ItemPedido item : pedidoActual.getProductos()) {
             productosArea.append(
-                    item.getProducto()
-                            .getDescripcion()
-                    + " x"
-                    + item.getCantidad()
-                    + " - $"
-                    + String.format(
-                            "%.0f",
-                            item.getSubtotal()
-                    )
-                    + "\n"
+                    "• " + item.getProducto().getDescripcion()
+                            + " (x" + item.getCantidad() + ")  —  $"
+                            + String.format("%.0f", item.getSubtotal())
+                            + "\n"
             );
         }
     }
 
-    public static void main(
-            String[] args
-    ) {
-
-        SwingUtilities.invokeLater(
-                () -> {
-
-                    VentanaPrincipal ventana =
-                            new VentanaPrincipal();
-
-                    ventana.setVisible(true);
-                }
-        );
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            VentanaPrincipal ventana = new VentanaPrincipal();
+            ventana.setVisible(true);
+        });
     }
 }
