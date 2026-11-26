@@ -12,6 +12,8 @@ import cafecentral.patrones.observer.CocinaObserver;
 import cafecentral.patrones.observer.MeseroObserver;
 import cafecentral.patrones.observer.ObservadorPedido;
 import cafecentral.servicios.PedidoService;
+import cafecentral.patrones.strategy.DescuentoPorcentaje;
+import cafecentral.patrones.strategy.SinPromocion;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -27,17 +29,17 @@ public class VentanaPrincipal extends JFrame implements ObservadorPedido {
     private JLabel estadoLabel;
     private JLabel subtotalLabel;
     private JLabel totalLabel;
+    private JLabel descuentoLabel;
 
     private JTextArea productosArea;
     private JTextArea notificacionesArea;
 
-    // Paleta de colores estilo cafetería (fácil de modificar)
-    private final Color COLOR_FONDO = new Color(247, 243, 238);       // Crema claro
-    private final Color COLOR_CAFE_OSCURO = new Color(59, 35, 20);    // Expreso oscuro
-    private final Color COLOR_CAFE_MEDIO = new Color(111, 78, 55);    // Café con leche
-    private final Color COLOR_CARAMELO = new Color(210, 145, 75);     // Dorado cálido
-    private final Color COLOR_TARJETA = Color.WHITE;                  // Blanco puro
-    private final Color COLOR_BORDE = new Color(220, 210, 198);       // Borde beige suave
+    private final Color COLOR_FONDO = new Color(247, 243, 238);
+    private final Color COLOR_CAFE_OSCURO = new Color(59, 35, 20);
+    private final Color COLOR_CAFE_MEDIO = new Color(111, 78, 55);
+    private final Color COLOR_CARAMELO = new Color(210, 145, 75);
+    private final Color COLOR_TARJETA = Color.WHITE;
+    private final Color COLOR_BORDE = new Color(220, 210, 198);
 
     public VentanaPrincipal() {
         pedidoService = new PedidoService();
@@ -55,7 +57,7 @@ public class VentanaPrincipal extends JFrame implements ObservadorPedido {
     }
 
     private void crearInterfaz() {
-        // Panel principal con márgenes alrededor
+
         JPanel contenedorPrincipal = new JPanel(new BorderLayout(15, 15));
         contenedorPrincipal.setBackground(COLOR_FONDO);
         contenedorPrincipal.setBorder(new EmptyBorder(15, 15, 15, 15));
@@ -119,6 +121,18 @@ public class VentanaPrincipal extends JFrame implements ObservadorPedido {
         JButton lecheButton = crearBotonEstilizado("+ Agregar leche deslactosada", new Color(242, 232, 218), COLOR_CAFE_OSCURO);
         JButton shotButton = crearBotonEstilizado("+ Agregar shot adicional", new Color(242, 232, 218), COLOR_CAFE_OSCURO);
 
+        JLabel promocionesLabel = new JLabel("PROMOCIONES:", SwingConstants.LEFT);
+        promocionesLabel.setFont(new Font("SansSerif", Font.BOLD, 12));
+        promocionesLabel.setForeground(Color.GRAY);
+
+        JButton descuento10Button = crearBotonEstilizado("Descuento del 10%", new Color(242, 232, 218), COLOR_CAFE_OSCURO);
+        JButton descuento20Button = crearBotonEstilizado("Descuento del 20%", new Color(242, 232, 218), COLOR_CAFE_OSCURO);
+        JButton sinDescuentoButton = crearBotonEstilizado("Quitar descuento", new Color(242, 232, 218), COLOR_CAFE_OSCURO);
+
+        descuento10Button.addActionListener(e -> aplicarDescuento(10));
+        descuento20Button.addActionListener(e -> aplicarDescuento(20));
+        sinDescuentoButton.addActionListener(e -> quitarDescuento());
+
         JButton nuevoPedidoButton = crearBotonEstilizado("✨  Nuevo Pedido", COLOR_CARAMELO, Color.WHITE);
 
         americanoButton.addActionListener(e -> agregarAmericano());
@@ -132,7 +146,11 @@ public class VentanaPrincipal extends JFrame implements ObservadorPedido {
         botones.add(extrasLabel);
         botones.add(lecheButton);
         botones.add(shotButton);
-        botones.add(new JLabel("")); // Espacio separador
+        botones.add(promocionesLabel);
+        botones.add(descuento10Button);
+        botones.add(descuento20Button);
+        botones.add(sinDescuentoButton);
+        botones.add(new JLabel(""));
         botones.add(nuevoPedidoButton);
 
         panel.add(botones, BorderLayout.CENTER);
@@ -165,8 +183,7 @@ public class VentanaPrincipal extends JFrame implements ObservadorPedido {
         scroll.setBorder(new LineBorder(COLOR_BORDE, 1));
         panel.add(scroll, BorderLayout.CENTER);
 
-        // Panel inferior con datos de facturación
-        JPanel informacion = new JPanel(new GridLayout(4, 1, 4, 4));
+        JPanel informacion = new JPanel(new GridLayout(5, 1, 4, 4));
         informacion.setBackground(new Color(247, 243, 238));
         informacion.setBorder(BorderFactory.createCompoundBorder(
                 new LineBorder(COLOR_BORDE, 1),
@@ -185,6 +202,10 @@ public class VentanaPrincipal extends JFrame implements ObservadorPedido {
         subtotalLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
         subtotalLabel.setForeground(Color.DARK_GRAY);
 
+        descuentoLabel = new JLabel("Descuento: $0");
+        descuentoLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        descuentoLabel.setForeground(new Color(56, 142, 60));
+
         totalLabel = new JLabel("Total: $0");
         totalLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
         totalLabel.setForeground(COLOR_CAFE_OSCURO);
@@ -192,6 +213,7 @@ public class VentanaPrincipal extends JFrame implements ObservadorPedido {
         informacion.add(numeroPedidoLabel);
         informacion.add(estadoLabel);
         informacion.add(subtotalLabel);
+        informacion.add(descuentoLabel);
         informacion.add(totalLabel);
 
         panel.add(informacion, BorderLayout.SOUTH);
@@ -223,7 +245,6 @@ public class VentanaPrincipal extends JFrame implements ObservadorPedido {
 
         panel.add(botonesEstado, BorderLayout.NORTH);
 
-        // Panel de notificaciones estilo consola moderna
         JPanel notificacionesPanel = new JPanel(new BorderLayout(5, 5));
         notificacionesPanel.setBackground(COLOR_TARJETA);
         notificacionesPanel.setBorder(BorderFactory.createCompoundBorder(
@@ -252,7 +273,6 @@ public class VentanaPrincipal extends JFrame implements ObservadorPedido {
         return panel;
     }
 
-    // Método auxiliar sencillo para darle estilo plano y bonito a todos los botones
     private JButton crearBotonEstilizado(String texto, Color fondo, Color textoColor) {
         JButton boton = new JButton(texto);
         boton.setFont(new Font("SansSerif", Font.BOLD, 14));
@@ -330,6 +350,16 @@ public class VentanaPrincipal extends JFrame implements ObservadorPedido {
         actualizarPantalla();
     }
 
+    private void aplicarDescuento(int porcentaje) {
+        pedidoActual.setPromocion(new DescuentoPorcentaje(porcentaje + "%", porcentaje));
+        actualizarPantalla();
+    }
+
+    private void quitarDescuento() {
+        pedidoActual.setPromocion(new SinPromocion());
+        actualizarPantalla();
+    }
+
     private void cambiarEstado(EstadoPedido nuevoEstado) {
         if (pedidoActual == null) {
             return;
@@ -353,6 +383,8 @@ public class VentanaPrincipal extends JFrame implements ObservadorPedido {
         numeroPedidoLabel.setText("Pedido #" + pedidoActual.getId());
         estadoLabel.setText("Estado: " + pedidoActual.getEstado());
         subtotalLabel.setText(String.format("Subtotal: $%.0f", pedidoActual.calcularSubtotal()));
+        double descuento = pedidoActual.calcularSubtotal() - pedidoActual.calcularTotal();
+        descuentoLabel.setText(String.format("Descuento: $%.0f", descuento));
         totalLabel.setText(String.format("Total: $%.0f", pedidoActual.calcularTotal()));
 
         productosArea.setText("");
